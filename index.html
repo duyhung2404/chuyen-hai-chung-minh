@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xin lỗi Phương nhiều nhé... ❤️</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { 
+            width: 100%; height: 100%; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; background-color: #050510; color: #fff;
+        }
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; transition: all 0.5s ease; opacity: 0; pointer-events: none;
+            z-index: 10;
+        }
+        .active { opacity: 1; pointer-events: auto; }
+        
+        /* MÀN HÌNH 1: SẢNH CHỜ */
+        #lobby-screen { background: radial-gradient(circle, #1f112e 0%, #050510 100%); }
+        .btn-glow {
+            padding: 15px 35px; font-size: 1.2rem; font-weight: bold;
+            color: #fff; background: linear-gradient(45deg, #7b4397, #dc2430);
+            border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 0 20px rgba(220, 36, 48, 0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-glow:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(220, 36, 48, 0.8); }
+        
+        /* MÀN HÌNH 2: MẬT KHẨU */
+        #password-screen { background: #0b0914; }
+        .pass-box {
+            background: rgba(255, 255, 255, 0.04); padding: 35px;
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center; backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-width: 90%; width: 400px;
+        }
+        .pass-box h3 { margin-bottom: 20px; color: #ff758c; font-size: 1.1rem; line-height: 1.6; }
+        .pass-box input {
+            width: 100%; padding: 12px 20px; margin-bottom: 20px;
+            border: none; border-radius: 25px; background: rgba(255,255,255,0.08);
+            color: #fff; font-size: 1rem; text-align: center; outline: none;
+            border: 1px solid transparent; transition: 0.3s;
+        }
+        .pass-box input:focus { border-color: #ff416c; }
+        .btn-submit { padding: 10px 30px; background: #dc2430; border: none; border-radius: 20px; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-submit:hover { background: #ff416c; }
+        .error-msg { color: #ff4b2b; font-size: 0.9rem; margin-top: 12px; display: none; }
+        
+        /* MÀN HÌNH ĐỆM: CHỮ TỰ CHẠY */
+        #typing-screen { background: #000; padding: 25px; text-align: center; }
+        .typing-box {
+            max-width: 600px; font-size: 1.35rem; line-height: 2; color: #ffe4e1;
+            font-family: 'Times New Roman', Times, serif; font-style: italic; min-height: 150px;
+            letter-spacing: 0.5px;
+        }
+        .envelope-wrapper {
+            margin-top: 30px; opacity: 0; transform: scale(0.8);
+            transition: all 1s ease; cursor: pointer; display: none;
+        }
+        .envelope-wrapper.show { opacity: 1; transform: scale(1); display: block; }
+        .envelope {
+            width: 140px; height: 90px; background: #ff758c; position: relative;
+            border-radius: 0 0 5px 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .envelope::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            border-left: 70px solid transparent; border-right: 70px solid transparent;
+            border-top: 55px solid #ff416c; width: 0; height: 0;
+        }
+        .heart-btn {
+            position: absolute; top: 35px; left: 55px; font-size: 1.8rem;
+            color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            animation: bounce 1.2s infinite; z-index: 5;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        /* MÀN HÌNH CHÍNH: TRÌNH CHIẾU ẢNH XEN KẼ LỜI XIN LỖI */
+        #main-screen { background: #020208; position: relative; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        
+        .slideshow-container {
+            position: relative; z-index: 2; max-width: 90%; width: 550px;
+            background: rgba(10, 5, 20, 0.85); padding: 25px;
+            border-radius: 20px; border: 1px solid rgba(255, 105, 180, 0.25);
+            backdrop-filter: blur(10px); text-align: center;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.7);
+            opacity: 0; transform: scale(0.8); transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .slideshow-container.pop-up { opacity: 1; transform: scale(1); }
+        
+        /* Khung hiển thị ảnh */
+        .image-box {
+            width: 100%; height: 350px; border-radius: 12px; overflow: hidden;
+            border: 3px solid #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            position: relative; background: #111;
+        }
+        .slideshow-img {
+            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0; opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+        .slideshow-img.active-img { opacity: 1; z-index: 2; }
+        
+        /* Lời xin lỗi chạy bên dưới */
+        .apology-text-container {
+            margin-top: 20px; min-height: 70px; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .apology-text {
+            font-size: 1.15rem; line-height: 1.6; color: #ffe4e1;
+            font-family: 'Georgia', serif; font-style: italic;
+            transition: all 0.5s ease; opacity: 0; transform: translateY(10px);
+        }
+        .apology-text.active-text { opacity: 1; transform: translateY(0); }
+        
+        /* Nút điều hướng chuyển ảnh */
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 15px; width: 100%; padding: 0 10px; }
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 8px 20px; border-radius: 20px; cursor: pointer;
+            font-weight: bold; transition: 0.3s; font-size: 0.9rem;
+        }
+        .btn-nav:hover { background: #ff69b4; border-color: #ff69b4; box-shadow: 0 0 10px rgba(255,105,180,0.5); }
+        .img-counter { color: #aaa; font-size: 0.85rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="bangkhuangu.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="lobby-screen" class="screen active">
+        <button class="btn-glow" onclick="goToPassword()">Bấm vào đây nè</button>
+    </div>
+
+    <div id="password-screen" class="screen">
+        <div class="pass-box">
+            <h3>Gợi ý mật khẩu:<br>Ngày mà hai đứa mình bắt đầu quen nhau bước vào đời nhau ấy hì ❤️</h3>
+            <input type="text" id="password-input" placeholder="Nhập mật khẩu (Ví dụ: 1402)..." onkeypress="checkEnter(event)">
+            <button class="btn-submit" onclick="verifyPassword()">Xác nhận</button>
+            <p id="error-message" class="error-msg">Hình như không phải ngày này rồi Phương ơi, thử lại xem nha! ❤️</p>
+        </div>
+    </div>
+
+    <div id="typing-screen" class="screen">
+        <div id="text-target" class="typing-box"></div>
+        <div id="envelope-btn" class="envelope-wrapper" onclick="openLetter()">
+            <div class="envelope">
+                <div class="heart-btn">❤</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-screen" class="screen">
+        <canvas id="heartCanvas"></canvas>
+        
+        <div id="main-slideshow" class="slideshow-container">
+            <div class="image-box" id="image-container">
+                </div>
+            
+            <div class="apology-text-container">
+                <div id="text-container" class="apology-text">Lời xin lỗi sẽ hiển thị ở đây...</div>
+            </div>
+            
+            <div class="nav-buttons">
+                <button class="btn-nav" onclick="changeSlide(-1)">◀ Ảnh trước</button>
+                <div class="img-counter" id="slide-counter">1 / 50</div>
+                <button class="btn-nav" onclick="changeSlide(1)">Ảnh sau ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= KHÔNG GIAN CẤU HÌNH CỦA ÔNG =================
+        const CORRECT_PASSWORD = "2404"; // MẬT KHẨU: Ông đổi thành ngày quen nhau của 2 đứa (Ví dụ: ngày 24 tháng 04)
+        
+        // Đoạn chữ dẫn nhập tự chạy ở màn hình đệm
+        const introLines = [
+            "Em à...",
+            "Anh biết mấy ngày qua em giận và buồn anh nhiều lắm.",
+            "Anh không giỏi nói những lời hoa mỹ, cũng hay vụng về làm em suy nghĩ...",
+            "Nên trang web nhỏ này là tất cả sự chân thành và lời xin lỗi sâu sắc nhất của anh gửi tới em.",
+            "Hãy cùng tôi nhìn lại những khoảnh khắc của hai đứa mình nhé...",
+            "Bấm vào trái tim để mở hộp ký ức nha... ❤️"
+        ];
+
+        // DANH SÁCH LỜI XIN LỖI XEN KẼ THEO TỪNG TẤM ẢNH
+        // Nếu có 50 ảnh thì ông cứ viết các câu tương ứng. Nếu ảnh nhiều hơn số câu, các ảnh sau sẽ tự động lặp lại lời xin lỗi hoặc hiện câu cuối cùng.
+        const apologyTexts = [
+            "Xin lỗi em vì những lần anh vô tâm không để ý đến cảm xúc của bạn... 🥺",
+            "Xem lại ảnh này thấy hồi đó hai đứa mình vui vẻ biết bao nhiêu, anh không muốn đánh mất nụ cười này của em đâu.",
+            "Anh biết mình còn nhiều tính xấu, hay làm em phải bận lòng suy nghĩ.",
+            "Những lúc em im lặng, lòng anh thực sự rối bời và lo sợ lắm...",
+            "Cảm ơn em đã luôn bao dung và kiên nhẫn với một đứa cứng đầu như em.",
+            "Bức hình này chụp lúc hai đứa mình đáng yêu nhất nè, giận dỗi không hợp với chúng mình chút nào cả.",
+            "Cho anh xin lỗi một lần nữa nhé, anh hứa sẽ sửa đổi và chú ý hơn mà.",
+            "Đừng buồn anh nữa nha công chúa ơi, nhìn em buồn anh đau lòng lắm... ❤️",
+            "Mỗi tấm ảnh là một kỷ niệm vô giá mà anh luôn trân trọng vô cùng.",
+            "Mong rằng em sẽ nhận lời xin lỗi chân thành này từ anh nhé! Love you... 💕"
+            // Ông có thể copy thêm dòng và viết thêm bao nhiêu tùy thích ở đây nhé!
+        ];
+
+        const TOTAL_IMAGES = 50; // TỔNG SỐ LƯỢNG ẢNH CỦA ÔNG (Ví dụ có 50 ảnh thì điền 50, có 70 điền 70)
+        // Tên file ảnh trên github ông nên đặt là 1.png, 2.png, 3.png... cho đến hết để code tự chạy cấu hình tự động.
+        const IMAGE_BASE_URL = "https://duyhung2404.github.io/for-ha-phuong/"; 
+        const IMAGE_EXTENSION = ".png"; // Đuôi file ảnh của ông (.png hoặc .jpg)
+        // ===============================================================
+
+        let isTypingStarted = false;
+
+        function goToPassword() {
+            document.getElementById('lobby-screen').classList.remove('active');
+            document.getElementById('password-screen').classList.add('active');
+            try {
+                const music = document.getElementById('bg-music');
+                if (music) { music.play().catch(e => console.log("Chặn phát nhạc: ", e)); }
+            } catch(err) { console.log("Lỗi nhạc: ", err); }
+        }
+
+        function checkEnter(e) { if(e.key === 'Enter') { verifyPassword(); } }
+
+        function verifyPassword() {
+            const input = document.getElementById('password-input').value.trim().toLowerCase();
+            if(input === CORRECT_PASSWORD) {
+                if (isTypingStarted) return; 
+                isTypingStarted = true; 
+                document.getElementById('password-screen').classList.remove('active');
+                document.getElementById('typing-screen').classList.add('active');
+                startTypingEffect();
+            } else {
+                document.getElementById('error-message').style.display = 'block';
+            }
+        }
+
+        let lineIndex = 0; let charIndex = 0;
+        const targetEl = document.getElementById("text-target");
+
+        function startTypingEffect() {
+            if (lineIndex < introLines.length) {
+                if (charIndex < introLines[lineIndex].length) {
+                    targetEl.innerHTML += introLines[lineIndex].charAt(charIndex);
+                    charIndex++;
+                    setTimeout(startTypingEffect, 60);
+                } else {
+                    targetEl.innerHTML += "<br><br>";
+                    lineIndex++; charIndex = 0;
+                    setTimeout(startTypingEffect, 1000);
+                }
+            } else {
+                const envelope = document.getElementById("envelope-btn");
+                envelope.style.display = "block";
+                setTimeout(() => envelope.classList.add("show"), 50);
+            }
+        }
+
+        // Tạo danh sách ảnh tự động vào giao diện
+        function buildSlideshow() {
+            const container = document.getElementById('image-container');
+            container.innerHTML = '';
+            for(let i = 1; i <= TOTAL_IMAGES; i++) {
+                const img = document.createElement('img');
+                img.src = `${IMAGE_BASE_URL}${i}${IMAGE_EXTENSION}`;
+                img.className = 'slideshow-img';
+                if(i === 1) img.className = 'slideshow-img active-img';
+                container.appendChild(img);
+            }
+            updateSlideContent();
+        }
+
+        function openLetter() {
+            document.getElementById('typing-screen').classList.remove('active');
+            document.getElementById('main-screen').classList.add('active');
+            buildSlideshow();
+            initEffects();
+            setTimeout(() => { document.getElementById('main-slideshow').classList.add('pop-up'); }, 200);
+        }
+
+        let currentSlide = 0;
+
+        function changeSlide(direction) {
+            const images = document.querySelectorAll('.slideshow-img');
+            if(images.length === 0) return;
+            
+            images[currentSlide].classList.remove('active-img');
+            currentSlide = (currentSlide + direction + TOTAL_IMAGES) % TOTAL_IMAGES;
+            images[currentSlide].classList.add('active-img');
+            
+            updateSlideContent();
+        }
+
+        function updateSlideContent() {
+            // Cập nhật số đếm ảnh
+            document.getElementById('slide-counter').innerText = `${currentSlide + 1} / ${TOTAL_IMAGES}`;
+            
+            // Cập nhật lời xin lỗi tương ứng (Nếu ảnh nhiều hơn số câu chữ thì lấy câu cuối cùng)
+            const textEl = document.getElementById('text-container');
+            textEl.classList.remove('active-text');
+            
+            setTimeout(() => {
+                let txt = apologyTexts[currentSlide];
+                if (!txt) {
+                    txt = apologyTexts[apologyTexts.length - 1] || "Mong Phương hết giận tôi nhé... ❤️";
+                }
+                textEl.innerText = txt;
+                textEl.classList.add('active-text');
+            }, 300);
+        }
+
+        // Hiệu ứng bong bóng trái tim bay ngầm dưới nền
+        function initEffects() {
+            const canvas = document.getElementById('heartCanvas'); const ctx = canvas.getContext('2d');
+            function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize); resize();
+            const hearts = []; const stars = [];
+            for(let i = 0; i < 100; i++) { stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 1.5 + 0.5, alpha: Math.random(), speed: Math.random() * 0.02 + 0.01 }); }
+            function createHeart() { return { x: Math.random() * canvas.width, y: canvas.height + Math.random() * 100, size: Math.random() * 6 + 4, speedY: Math.random() * 1.2 + 0.6, speedX: Math.sin(Math.random() * Math.PI) * 0.4, alpha: Math.random() * 0.4 + 0.4, hue: Math.random() * 20 + 340 }; }
+            for(let i = 0; i < 60; i++) { let h = createHeart(); h.y = Math.random() * canvas.height; hearts.push(h); }
+            function drawHeart(x, y, size, color) { ctx.save(); ctx.beginPath(); ctx.translate(x, y); ctx.moveTo(0, 0); ctx.bezierCurveTo(-size / 2, -size / 2, -size, size / 3, 0, size); ctx.bezierCurveTo(size, size / 3, size / 2, -size / 2, 0, 0); ctx.closePath(); ctx.fillStyle = color; ctx.fill(); ctx.restore(); }
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(s => { s.alpha += s.speed; if(s.alpha > 1 || s.alpha < 0) s.speed = -s.speed; ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha)})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill(); });
+                if (hearts.length < 150) { hearts.push(createHeart()); }
+                for(let i = hearts.length - 1; i >= 0; i--) { let h = hearts[i]; h.y -= h.speedY; h.x += h.speedX; drawHeart(h.x, h.y, h.size, `hsla(${h.hue}, 100%, 70%, ${h.alpha})`); if(h.y < -20) { hearts[i] = createHeart(); } }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>

@@ -82,7 +82,7 @@
         #main-screen { background: #020208; position: relative; }
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
         
-       .slideshow-container {
+        .slideshow-container {
             position: relative; z-index: 2; max-width: 95%; width: 340px;
             background: rgba(10, 5, 20, 0.85); padding: 20px;
             border-radius: 20px; border: 1px solid rgba(255, 105, 180, 0.25);
@@ -110,7 +110,7 @@
             margin-top: 20px; min-height: 70px; display: flex;
             align-items: center; justify-content: center;
         }
-      .apology-text {
+        .apology-text {
             font-size: 1.2rem; line-height: 1.6; color: #ffe4e1;
             font-family: 'Times New Roman', Times, serif; font-style: italic;
             letter-spacing: 0.5px;
@@ -161,8 +161,7 @@
         <canvas id="heartCanvas"></canvas>
         
         <div id="main-slideshow" class="slideshow-container">
-            <div class="image-box" id="image-container">
-                </div>
+            <div class="image-box" id="image-container"></div>
             
             <div class="apology-text-container">
                 <div id="text-container" class="apology-text">Lời xin lỗi sẽ hiển thị ở đây...</div>
@@ -178,7 +177,7 @@
 
     <script>
         // ================= KHÔNG GIAN CẤU HÌNH CỦA ÔNG =================
-        const CORRECT_PASSWORD = "1502"; // MẬT KHẨU: Ông đổi thành ngày quen nhau của 2 đứa (Ví dụ: ngày 24 tháng 04)
+        const CORRECT_PASSWORD = "1502"; // MẬT KHẨU: Ngày quen nhau
         
         // Đoạn chữ dẫn nhập tự chạy ở màn hình đệm
         const introLines = [
@@ -190,8 +189,7 @@
             "Bấm vào trái tim để mở hộp ký ức nha... ❤️"
         ];
 
-        // DANH SÁCH LỜI XIN LỖI XEN KẼ THEO TỪNG TẤM ẢNH
-        // Nếu có 50 ảnh thì ông cứ viết các câu tương ứng. Nếu ảnh nhiều hơn số câu, các ảnh sau sẽ tự động lặp lại lời xin lỗi hoặc hiện câu cuối cùng.
+        // DANH SÁCH LỜI XIN LỖI XEN KẼ THEO TỪNG TẤM ẢNH (Đã bổ sung dấu phẩy đầy đủ)
         const apologyTexts = [
             "Xin lỗi em vì những lần anh vô tâm không để ý đến cảm xúc của em... 🥺",
             "Xem lại ảnh này thấy hồi đó hai đứa mình vui vẻ biết bao nhiêu, anh không muốn đánh mất nụ cười này của em đâu.",
@@ -202,38 +200,34 @@
             "Cho anh xin lỗi một lần nữa nhé, anh hứa sẽ sửa đổi và chú ý hơn mà.",
             "Đừng buồn anh nữa nha công chúa ơi, nhìn em buồn anh đau lòng lắm... ❤️",
             "Mỗi tấm ảnh là một kỷ niệm vô giá mà anh luôn trân trọng vô cùng.",
-            " Mỗi tấm ảnh là một khoảnh khắc trong cuộc đời mà có lẽ anh là người may mắn khi trải qua cùng em"
-            "Nhìn xemm chúng ta từng đáng yêu như thế này"
-            "Như này..."
-            "Như này nữa nàyyy"
-            "Xem đến đây chắc là đang cười rồi đúng không"
-            "Nếu đã cười rồi thì xin hãy nhận lời xin lỗi chân thành này từ anh nhé! Ai Lớp Ziu... 💕"
-            // Ông có thể copy thêm dòng và viết thêm bao nhiêu tùy thích ở đây nhé!
+            "Mỗi tấm ảnh là một khoảnh khắc trong cuộc đời mà có lẽ anh là người may mắn khi trải qua cùng em.",
+            "Nhìn xemm chúng ta từng đáng yêu như thế này.",
+            "Như này...",
+            "Như này nữa nàyyy.",
+            "Xem đến đây chắc là đang cười rồi đúng không?",
+            "If you are smiling, please accept my sincere apology! I love you... 💕"
         ];
 
-        const TOTAL_IMAGES = 50; // TỔNG SỐ LƯỢNG ẢNH CỦA ÔNG (Ví dụ có 50 ảnh thì điền 50, có 70 điền 70)
-        // Tên file ảnh trên github ông nên đặt là 1.png, 2.png, 3.png... cho đến hết để code tự chạy cấu hình tự động.
+        const TOTAL_IMAGES = 50; 
         const IMAGE_BASE_URL = "https://duyhung2404.github.io/chuyen-hai-chung-minh/"; 
-        const IMAGE_EXTENSION = ".jpg"; // Đuôi file ảnh của ông (.png hoặc .jpg)
+        const IMAGE_EXTENSION = ".jpg"; 
         // ===============================================================
 
         let isTypingStarted = false;
 
-     function goToPassword() {
-            // Chuyển màn hình trước, tuyệt đối không động chạm gì đến nhạc ở đây
+        function goToPassword() {
             document.getElementById('lobby-screen').classList.remove('active');
             document.getElementById('password-screen').classList.add('active');
         }
 
         function checkEnter(e) { if(e.key === 'Enter') { verifyPassword(); } }
 
-    function verifyPassword() {
+        function verifyPassword() {
             const input = document.getElementById('password-input').value.trim().toLowerCase();
             if(input === CORRECT_PASSWORD) {
                 if (isTypingStarted) return; 
                 isTypingStarted = true; 
                 
-                // Phát nhạc tại đây khi mật khẩu chính xác
                 try {
                     var music = document.getElementById('bg-music');
                     if (music) { music.play().catch(e => console.log("Chặn nhạc:", e)); }
@@ -268,7 +262,6 @@
             }
         }
 
-        // Tạo danh sách ảnh tự động vào giao diện
         function buildSlideshow() {
             const container = document.getElementById('image-container');
             container.innerHTML = '';
@@ -304,24 +297,20 @@
         }
 
         function updateSlideContent() {
-            // Cập nhật số đếm ảnh
             document.getElementById('slide-counter').innerText = `${currentSlide + 1} / ${TOTAL_IMAGES}`;
-            
-            // Cập nhật lời xin lỗi tương ứng (Nếu ảnh nhiều hơn số câu chữ thì lấy câu cuối cùng)
             const textEl = document.getElementById('text-container');
             textEl.classList.remove('active-text');
             
             setTimeout(() => {
                 let txt = apologyTexts[currentSlide];
                 if (!txt) {
-                    txt = apologyTexts[apologyTexts.length - 1] || "Mong Phương hết giận tôi nhé... ❤️";
+                    txt = apologyTexts[apologyTexts.length - 1] || "Mong em hết giận anh nhé... ❤️";
                 }
                 textEl.innerText = txt;
                 textEl.classList.add('active-text');
             }, 300);
         }
 
-        // Hiệu ứng bong bóng trái tim bay ngầm dưới nền
         function initEffects() {
             const canvas = document.getElementById('heartCanvas'); const ctx = canvas.getContext('2d');
             function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }

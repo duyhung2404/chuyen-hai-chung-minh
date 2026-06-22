@@ -219,13 +219,24 @@
 
         let isTypingStarted = false;
 
-        function goToPassword() {
+     function goToPassword() {
+            // 1. Ép chuyển màn hình ngay lập tức để không bao giờ bị kẹt nút
             document.getElementById('lobby-screen').classList.remove('active');
             document.getElementById('password-screen').classList.add('active');
-            try {
-                const music = document.getElementById('bg-music');
-                if (music) { music.play().catch(e => console.log("Chặn phát nhạc: ", e)); }
-            } catch(err) { console.log("Lỗi nhạc: ", err); }
+            
+            // 2. Thử phát nhạc một cách độc lập hoàn toàn
+            setTimeout(function() {
+                try {
+                    var music = document.getElementById('bg-music');
+                    if (music) {
+                        music.play().catch(function(e) {
+                            console.log("Trình duyệt chặn phát nhạc tự động: ", e);
+                        });
+                    }
+                } catch(err) {
+                    console.log("Lỗi file nhạc: ", err);
+                }
+            }, 100);
         }
 
         function checkEnter(e) { if(e.key === 'Enter') { verifyPassword(); } }
